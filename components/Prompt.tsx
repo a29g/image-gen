@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import useSWR from "swr"
 import fetchSuggestionFromChatGpt from "../utils/fetchSuggestionFromChatGpt";
 const Prompt = () => {
@@ -11,9 +11,34 @@ const Prompt = () => {
     })
     const loading = isLoading || isValidating
     console.log(suggestion)
+
+    const submitPrompt = async (useSuggestion?: boolean) => {
+        const inputPrompt = input;
+        setInput("")
+        console.log(inputPrompt)
+
+        const sentPrompt = useSuggestion ? suggestion : inputPrompt
+
+        const res = await fetch("/api/generateImage", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ prompt: sentPrompt })
+        })
+
+        const data = await res.json();
+    }
+
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        await submitPrompt();
+    }
+
     return (
         <div className="m-10">
-            <form className="flex flex-col lg:flex-row">
+            <form onSubmit={handleSubmit} className="flex flex-col lg:flex-row">
                 <textarea
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
@@ -23,7 +48,9 @@ const Prompt = () => {
                 <button type="submit"
                     className={`p-4 font-bold ${input ? "bg-green-300 rounded-md transition-colors duration-200" : " text-gray-500 bg-slate-200  cursor-not-allowed border-2  rounded-md"}`}
                 >Generate</button>
-                <button type="button" className="p-4 bg-green-500  text-white duration-200 font-bold  rounded-md">Use Suggestion</button>
+                <button type="button" className="p-4 bg-green-500  text-white duration-200 font-bold  rounded-md"
+                    onClick={() => submitPrompt(true)}
+                >Use Suggestion</button>
                 <button type="button" className="p-4 bg-green-700  text-white  duration-200 font-bold  rounded-md" onClick={mutate}>New Suggestion </button>
             </form>
 
