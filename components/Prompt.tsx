@@ -3,6 +3,10 @@
 import { FormEvent, useState } from "react";
 import useSWR from "swr"
 import fetchSuggestionFromChatGpt from "../utils/fetchSuggestionFromChatGpt";
+import fetchImages from "../utils/fetchImages";
+import { toast } from "react-hot-toast";
+
+
 const Prompt = () => {
 
     const [input, setInput] = useState("")
@@ -10,14 +14,19 @@ const Prompt = () => {
         revalidateOnFocus: false,
     })
     const loading = isLoading || isValidating
-    console.log(suggestion)
+
 
     const submitPrompt = async (useSuggestion?: boolean) => {
         const inputPrompt = input;
         setInput("")
-        console.log(inputPrompt)
 
         const sentPrompt = useSuggestion ? suggestion : inputPrompt
+
+        const notificationPromptShort = sentPrompt.slice(0, 20);
+
+        const notification = toast.loading(
+            `DALL·E is creating: ${notificationPromptShort}...`
+        );
 
         const res = await fetch("/api/generateImage", {
             method: "POST",
@@ -28,7 +37,21 @@ const Prompt = () => {
         })
 
         const data = await res.json();
+
+        if (data.error) {
+            toast.error(data.error);
+        } else {
+            toast.success(`Your Art has been Generated!`, {
+                id: notification,
+            });
+        }
+
+        updateImages()
     }
+
+    const { mutate: updateImages } = useSWR("images", fetchImages, {
+        revalidateOnFocus: false,
+    })
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();

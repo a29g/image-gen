@@ -6,7 +6,6 @@ module.exports = async function (context, req) {
   const accountName = process.env.accountName;
   const containerName = "images";
 
-  console.log(`Request Body: ${JSON.stringify(req.body)}`);
 
   const { prompt } = req.body;
 

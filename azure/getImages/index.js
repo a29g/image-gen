@@ -36,8 +36,8 @@ module.exports = async function (context, req) {
     return bName - aName;
   });
 
-  context.log(sortedImageUrls);
-  context.log(`Http function processed request for url "${req.url}"`);
+
+  // context.log(`Http function processed request for url "${req.url}"`);
 
   // status: 200, /* Defaults to 200 */
 
